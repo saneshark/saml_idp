@@ -1,19 +1,7 @@
 # encoding: utf-8
 require 'spec_helper'
 
-describe SamlIdp::Controller do
-  include SamlIdp::Controller
-
-  def render(*)
-  end
-
-  def head(*)
-  end
-
-  def params
-    @params ||= {}
-  end
-
+shared_examples 'SamlIdp::Controller' do |options|
   it "should find the SAML ACS URL" do
     requested_saml_acs_url = "https://example.com/saml/consume"
     params[:SAMLRequest] = make_saml_request(requested_saml_acs_url)
@@ -69,6 +57,8 @@ describe SamlIdp::Controller do
 
 
       [:sha1, :sha256, :sha384, :sha512].each do |algorithm_name|
+        next if options[:skip].include?(algorithm_name)
+        
         it "should create a SAML Response using the #{algorithm_name} algorithm" do
           self.algorithm = algorithm_name
           saml_response = encode_response(principal)
@@ -93,5 +83,29 @@ describe SamlIdp::Controller do
         end
       end
     end
+  end
+end
+
+describe SamlIdp::Controller do
+  include SamlIdp::Controller
+
+  def render(*)
+  end
+
+  def head(*)
+  end
+
+  def params
+    @params ||= {}
+  end
+
+  context "with multi_cert true" do
+    before(:each) { SamlIdp.config.idp_multi_cert = SamlIdp::Default::IDP_MULTI_CERT }
+    include_examples "SamlIdp::Controller", skip: %i[sha1 sha384 sha512]
+  end
+
+  context "with multi_cert false" do
+    before(:each) { SamlIdp.config.idp_multi_cert = nil }
+    include_examples "SamlIdp::Controller", skip: []
   end
 end

@@ -25,6 +25,7 @@ module SamlIdp
       self.x509_certificate = Default::X509_CERTIFICATE
       self.secret_key = Default::SECRET_KEY
       self.algorithm = :sha1
+
       self.reference_id_generator = ->() { UUID.generate }
       self.service_provider = OpenStruct.new
       self.service_provider.finder = ->(_) { Default::SERVICE_PROVIDER }

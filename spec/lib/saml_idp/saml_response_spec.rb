@@ -1,6 +1,6 @@
 require 'spec_helper'
 module SamlIdp
-  describe SamlResponse do
+  shared_examples 'SamlResponse' do
     let(:reference_id) { "123" }
     let(:response_id) { "abc" }
     let(:issuer_uri) { "localhost" }
@@ -98,6 +98,18 @@ module SamlIdp
         saml_resp = OneLogin::RubySaml::Response.new(subject.build, settings: resp_settings)
         expect(saml_resp.session_expires_at).to be_nil
       end
+    end
+  end
+
+  describe SamlResponse do
+    xcontext "with multi_cert true" do
+      before(:each) { SamlIdp.config.idp_multi_cert = Default::IDP_MULTI_CERT }
+      include_examples "SamlResponse"
+    end
+
+    context "with multi_cert false" do
+      before(:each) { SamlIdp.config.idp_multi_cert = nil }
+      include_examples "SamlResponse"
     end
   end
 end

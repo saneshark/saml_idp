@@ -1,6 +1,7 @@
 require 'builder'
 module SamlIdp
   class SignatureBuilder
+    include Utils
     attr_accessor :signed_info_builder
 
     def initialize(signed_info_builder)
@@ -14,20 +15,16 @@ module SamlIdp
         signature.tag! "ds:SignatureValue", signature_value
         signature.KeyInfo xmlns: "http://www.w3.org/2000/09/xmldsig#" do |key_info|
           key_info.tag! "ds:X509Data" do |x509|
-            x509.tag! "ds:X509Certificate", x509_certificate
+            x509.tag! "ds:X509Certificate", scrubbed_signing_certificate
           end
         end
       end
     end
 
-    def x509_certificate
-      SamlIdp.config.x509_certificate
-      .to_s
-      .gsub(/-----BEGIN CERTIFICATE-----/,"")
-      .gsub(/-----END CERTIFICATE-----/,"")
-      .gsub(/\n/, "")
+    def scrubbed_signing_certificate
+      remove_headers_and_footer SamlIdp.config.signing_certificate
     end
-    private :x509_certificate
+    private :scrubbed_signing_certificate
 
     def signed_info
       signed_info_builder.raw
