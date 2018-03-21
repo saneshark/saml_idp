@@ -6,6 +6,7 @@ module SamlIdp
   class MetadataBuilder
     include Algorithmable
     include Signable
+    include Utils
     attr_accessor :configurator
 
     def initialize(configurator = SamlIdp.config)
@@ -24,6 +25,7 @@ module SamlIdp
 
             entity.IDPSSODescriptor protocolSupportEnumeration: protocol_enumeration do |descriptor|
               build_key_descriptor descriptor
+              build_key_descriptor(descriptor, type: "encryption", cert: scrubbed_encryption_certificate) if configurator.multi_cert?
               descriptor.SingleLogoutService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
                 Location: single_logout_service_post_location
               descriptor.SingleLogoutService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
@@ -51,11 +53,11 @@ module SamlIdp
     end
     alias_method :raw, :fresh
 
-    def build_key_descriptor(el)
-      el.KeyDescriptor use: "signing" do |key_descriptor|
+    def build_key_descriptor(el, type: "signing", cert: scrubbed_signing_certificate)
+      el.KeyDescriptor use: type do |key_descriptor|
         key_descriptor.KeyInfo xmlns: Saml::XML::Namespaces::SIGNATURE do |key_info|
           key_info.X509Data do |x509|
-            x509.X509Certificate x509_certificate
+            x509.X509Certificate cert
           end
         end
       end
@@ -137,12 +139,12 @@ module SamlIdp
     end
     private :raw_algorithm
 
-    def x509_certificate
-      SamlIdp.config.x509_certificate
-      .to_s
-      .gsub(/-----BEGIN CERTIFICATE-----/,"")
-      .gsub(/-----END CERTIFICATE-----/,"")
-      .gsub(/\n/, "")
+    def scrubbed_signing_certificate
+      remove_headers_and_footer SamlIdp.config.signing_certificate
+    end
+
+    def scrubbed_encryption_certificate
+      SamlIdp.config.multi_cert? ? remove_headers_and_footer(SamlIdp.config.encryption_certificate) : nil
     end
 
     %w[

@@ -1,12 +1,12 @@
 require 'spec_helper'
 module SamlIdp
-  describe MetadataBuilder do
+  shared_examples "MetadataBuilder" do |fingerprint|
     it "has a valid fresh" do
       expect(subject.fresh).to_not be_empty
     end
 
     it "signs valid xml" do
-      expect(Saml::XML::Document.parse(subject.signed).valid_signature?(Default::FINGERPRINT)).to be_truthy
+      expect(Saml::XML::Document.parse(subject.signed).valid_signature?(fingerprint)).to be_truthy
     end
 
     it "includes logout element" do
@@ -47,6 +47,18 @@ module SamlIdp
     it "includes logout element as HTTP Redirect" do
       subject.configurator.single_logout_service_redirect_location = 'https://example.com/saml/logout'
       expect(subject.fresh).to match('<SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://example.com/saml/logout"/>')
+    end
+  end
+
+  describe MetadataBuilder do
+    context "with multi_cert true" do
+      before(:each) { SamlIdp.config.idp_multi_cert = Default::IDP_MULTI_CERT }
+      include_examples "MetadataBuilder", Default::IDP_MULTI_CERT_SIGNING_FINGERPRINT
+    end
+
+    context "with multi_cert false" do
+      before(:each) { SamlIdp.config.idp_multi_cert = nil }
+      include_examples "MetadataBuilder", Default::FINGERPRINT
     end
   end
 end
