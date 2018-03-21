@@ -21,18 +21,7 @@ module SamlIdp
     attr_accessor :session_expiry
 
     def initialize
-      self.idp_multi_cert = {
-        signing: {
-          signing_cert: File.read("spec/support/certificates/idp_multi_signing_cert.crt"),
-          signing_key: File.read("spec/support/certificates/idp_multi_signing_key.key"),
-          password: '1234'
-        },
-        encryption: {
-          encryption_cert: File.read("spec/support/certificates/idp_multi_encryption_cert.crt"),
-          encryption_key: File.read("spec/support/certificates/idp_multi_encryption_key.key"),
-          password: '1234'
-        }
-      }
+      self.idp_multi_cert = Default::IDP_MULTI_CERT
       self.x509_certificate = Default::X509_CERTIFICATE
       self.secret_key = Default::SECRET_KEY
       self.algorithm = :sha1

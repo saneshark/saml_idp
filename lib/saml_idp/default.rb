@@ -45,5 +45,20 @@ EOS
     SERVICE_PROVIDER = {
       fingerprint: FINGERPRINT
     }
+
+    IDP_MULTI_CERT = {
+      signing: {
+        signing_cert: File.read("spec/support/certificates/idp_multi_signing_cert.crt"),
+        signing_key: File.read("spec/support/certificates/idp_multi_signing_key.key"),
+        password: '1234'
+      },
+      encryption: {
+        encryption_cert: File.read("spec/support/certificates/idp_multi_encryption_cert.crt"),
+        encryption_key: File.read("spec/support/certificates/idp_multi_encryption_key.key"),
+        password: '1234'
+      }
+    }
+    IDP_MULTI_CERT_SIGNING_FINGERPRINT = "8B:06:38:EA:1C:5F:EC:2B:8E:E8:C8:62:C7:ED:C7:03:41:38:61:B5"
+    IDP_MULTI_CERT_ENCRYPTION_FINGERPRINT = "40:59:79:97:B7:63:22:CA:1C:CF:1F:3E:B0:6C:6F:F7:3D:85:7C:96"
   end
 end
