@@ -16,11 +16,10 @@ module SamlIdp
     def fresh
       builder = Builder::XmlMarkup.new
       generated_reference_id do
-        builder.EntityDescriptor ID: reference_string,
-          xmlns: Saml::XML::Namespaces::METADATA,
-          "xmlns:saml" => Saml::XML::Namespaces::ASSERTION,
-          "xmlns:ds" => Saml::XML::Namespaces::SIGNATURE,
-          entityID: entity_id do |entity|
+        builder.EntityDescriptor,
+          "xmlns:md" => Saml::XML::Namespaces::METADATA,
+          ID: reference_string,
+          entityID: entity_id do |entity| #TODO: implement validUntil in EntityDescriptor
             sign entity
 
             entity.IDPSSODescriptor protocolSupportEnumeration: protocol_enumeration do |descriptor|
