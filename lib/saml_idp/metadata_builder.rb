@@ -16,11 +16,12 @@ module SamlIdp
     def fresh
       builder = Builder::XmlMarkup.new
       generated_reference_id do
-        builder.EntityDescriptor,
-          "xmlns:md" => Saml::XML::Namespaces::METADATA,
+        builder.tag! "md:EntityDescriptor", "xmlns:md" => Saml::XML::Namespaces::METADATA,
+          #TODO: implement validUntil: <Date>
           ID: reference_string,
-          entityID: entity_id do |entity| #TODO: implement validUntil in EntityDescriptor
+          entityID: entity_id do |entity|
             sign entity
+            build_entity_attributes(entity) if configurator.entity_attributes.any?
 
             entity.IDPSSODescriptor protocolSupportEnumeration: protocol_enumeration do |descriptor|
               build_key_descriptor descriptor
@@ -32,17 +33,7 @@ module SamlIdp
               build_name_id_formats descriptor
               descriptor.SingleSignOnService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
                 Location: single_service_post_location
-              build_attribute descriptor
-            end
-
-            entity.AttributeAuthorityDescriptor protocolSupportEnumeration: protocol_enumeration do |authority_descriptor|
-              build_key_descriptor authority_descriptor
-              build_organization authority_descriptor
-              build_contact authority_descriptor
-              authority_descriptor.AttributeService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
-                Location: attribute_service_location
-              build_name_id_formats authority_descriptor
-              build_attribute authority_descriptor
+              #build_attribute descriptor
             end
 
             build_organization entity
@@ -51,6 +42,29 @@ module SamlIdp
       end
     end
     alias_method :raw, :fresh
+
+    private
+
+    def build_entity_attributes(el)
+      el.tag! "md:Extensions" do |extensions|
+        extensions.tag! "mdattr:EntityAttributes",
+          "xmlns:mdattr" => Saml::XML::Namespaces::METADATA_ATTRIBUTE do |entity_attributes|
+            configurator.entity_attributes.each do |entity_attribute|
+              entity_attributes.tag! "saml:Attribute",
+                "xmlns:saml" => Saml::XML::Namespaces::ASSERTION,
+                Name: entity_attribute[:name],
+                NameFormat: entity_attribute[:name_format] do
+                  entity_attribute[:values_array].each do |value|
+                    entity_attributes.tag! "saml:AttributeValue", {"xmlns:xs" => Saml::XML::Namespaces::SCHEMA,
+                      "xmlns:xsi" => Saml::XML::Namespaces::SCHEMA_INSTANCE,
+                      "xsi:type" => "xs:string"},
+                      value
+                  end
+                end
+            end
+         end
+      end
+    end
 
     def build_key_descriptor(el, type: "signing", cert: scrubbed_signing_certificate)
       el.KeyDescriptor use: type do |key_descriptor|
@@ -61,28 +75,25 @@ module SamlIdp
         end
       end
     end
-    private :build_key_descriptor
 
     def build_name_id_formats(el)
       name_id_formats.each do |format|
         el.NameIDFormat format
       end
     end
-    private :build_name_id_formats
 
-    def build_attribute(el)
-      attributes.each do |attribute|
-        el.tag! "saml:Attribute",
-          NameFormat: attribute.name_format,
-          Name: attribute.name,
-          FriendlyName: attribute.friendly_name do |attribute_xml|
-            attribute.values.each do |value|
-              attribute_xml.tag! "saml:AttributeValue", value
-            end
-          end
-      end
-    end
-    private :build_attribute
+    # def build_attribute(el)
+    #   attributes.each do |attribute|
+    #     el.tag! "saml:Attribute",
+    #       FriendlyName: attribute.friendly_name do |attribute_xml|
+    #         attribute.values.each do |value|
+    #           attribute_xml.tag! "saml:AttributeValue", value
+    #         end
+    #       end,
+    #       Name: attribute.name,
+    #       NameFormat: attribute.name_format
+    #   end
+    # end
 
     def build_organization(el)
       el.Organization do |organization|
@@ -91,7 +102,6 @@ module SamlIdp
         organization.OrganizationURL organization_url, "xml:lang" => "en"
       end
     end
-    private :build_organization
 
     def build_contact(el)
       el.ContactPerson contactType: "technical" do |contact|
@@ -102,22 +112,18 @@ module SamlIdp
         contact.TelephoneNumber technical_contact.telephone       if technical_contact.telephone
       end
     end
-    private :build_contact
 
     def reference_string
       "_#{reference_id}"
     end
-    private :reference_string
 
     def entity_id
       configurator.entity_id.presence || configurator.base_saml_location
     end
-    private :entity_id
 
     def protocol_enumeration
       Saml::XML::Namespaces::PROTOCOL
     end
-    private :protocol_enumeration
 
     def attributes
       @attributes ||= configurator.attributes.inject([]) do |list, (key, opts)|
@@ -126,17 +132,14 @@ module SamlIdp
         list
       end
     end
-    private :attributes
 
     def name_id_formats
       @name_id_formats ||= NameIdFormatter.new(configurator.name_id.formats).all
     end
-    private :name_id_formats
 
     def raw_algorithm
       configurator.algorithm
     end
-    private :raw_algorithm
 
     def scrubbed_signing_certificate
       remove_headers_and_footer SamlIdp.config.signing_certificate

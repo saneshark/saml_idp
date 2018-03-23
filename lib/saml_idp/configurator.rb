@@ -16,6 +16,7 @@ module SamlIdp
     attr_accessor :single_service_post_location
     attr_accessor :single_logout_service_post_location
     attr_accessor :single_logout_service_redirect_location
+    attr_accessor :entity_attributes
     attr_accessor :attributes
     attr_accessor :service_provider
     attr_accessor :session_expiry
@@ -32,7 +33,102 @@ module SamlIdp
       self.service_provider.metadata_persister = ->(id, settings) {  }
       self.service_provider.persisted_metadata_getter = ->(id, service_provider) {  }
       self.session_expiry = 0
-      self.attributes = {}
+      self.entity_attributes = [{
+        name: "urn:oasis:names:tc:SAML:attribute:assurance-certification",
+        name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+        values_array: [
+          "http://idmanagement.gov/ns/assurance/loa/1",
+          "http://idmanagement.gov/ns/assurance/loa/2",
+          "http://idmanagement.gov/ns/assurance/loa/3"
+        ]
+      }]
+      self.attributes = {
+        birth_date: {
+          name: "birth_date",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Birth Date"
+        },
+        city: {
+          name: "city",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "City"
+        },
+        country: {
+          name: "country",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Country"
+        },
+        email: {
+          name: "email",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Email"
+        },
+        fname: {
+          name: "fname",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "First Name"
+        },
+        full_name: {
+          name: "full_name",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Full Name"
+        },
+        social: {
+          name: "social",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Full SSN"
+        },
+        gender: {
+          name: "gender",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Gender"
+        },
+        social_short: {
+          name: "social_short",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Last 4 of SSN"
+        },
+        lname: {
+          name: "lname",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Last Name"
+        },
+        mname: {
+          name: "mname",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Middle Name"
+        },
+        phone: {
+          name: "phone",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Phone"
+        },
+        zip: {
+          name: "zip",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Postal Code"
+        },
+        state: {
+          name: "state",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "State"
+        },
+        street: {
+          name: "street",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Street"
+        },
+        suffix: {
+          name: "suffix",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Suffix"
+        },
+        credentials: {
+          name: "credentials",
+          name_format: "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+          friendly_name: "Verified credentials"
+        }
+      }
     end
 
     def signing_certificate
