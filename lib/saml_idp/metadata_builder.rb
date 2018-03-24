@@ -23,17 +23,35 @@ module SamlIdp
             sign entity
             build_entity_attributes(entity) if configurator.entity_attributes.any?
 
-            entity.IDPSSODescriptor protocolSupportEnumeration: protocol_enumeration do |descriptor|
+            entity.tag! "md:IDPSSODescriptor", protocolSupportEnumeration: protocol_enumeration do |descriptor|
               build_key_descriptor descriptor
               build_key_descriptor(descriptor, type: "encryption", cert: scrubbed_encryption_certificate) if configurator.multi_cert?
-              descriptor.SingleLogoutService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+
+              descriptor.tag! "md:ArtifactResolutionService",
+                Binding: "urn:oasis:names:tc:SAML:2.0:bindings:SOAP",
+                Location: artifact_resolution_service_location,
+                index: "0",
+                isDefault: "false"
+
+              descriptor.tag! "md:SingleLogoutService",
+                Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
                 Location: single_logout_service_post_location
-              descriptor.SingleLogoutService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+
+              descriptor.tag! "md:SingleLogoutService",
+                Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
                 Location: single_logout_service_redirect_location
+
               build_name_id_formats descriptor
-              descriptor.SingleSignOnService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
-                Location: single_service_post_location
-              #build_attribute descriptor
+
+              descriptor.tag! "md:SingleSignOnService",
+                Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+                Location: single_sign_on_service_post_location
+
+              descriptor.tag! "md:SingleSignOnService",
+                Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+                Location: single_sign_on_service_redirect_location
+
+              build_attribute descriptor
             end
 
             build_organization entity
@@ -47,30 +65,38 @@ module SamlIdp
 
     def build_entity_attributes(el)
       el.tag! "md:Extensions" do |extensions|
-        extensions.tag! "mdattr:EntityAttributes",
-          "xmlns:mdattr" => Saml::XML::Namespaces::METADATA_ATTRIBUTE do |entity_attributes|
-            configurator.entity_attributes.each do |entity_attribute|
-              entity_attributes.tag! "saml:Attribute",
+        extensions.tag!("mdattr:EntityAttributes", "xmlns:mdattr" => Saml::XML::Namespaces::METADATA_ATTRIBUTE) do |entity_attributes|
+          configurator.entity_attributes.each do |entity_attribute|
+            entity_attributes.tag!(
+              "saml:Attribute",
+              {
                 "xmlns:saml" => Saml::XML::Namespaces::ASSERTION,
                 Name: entity_attribute[:name],
-                NameFormat: entity_attribute[:name_format] do
-                  entity_attribute[:values_array].each do |value|
-                    entity_attributes.tag! "saml:AttributeValue", {"xmlns:xs" => Saml::XML::Namespaces::SCHEMA,
+                NameFormat: entity_attribute[:name_format]
+              }
+            ) do
+                entity_attribute[:values_array].each do |value|
+                  entity_attributes.tag!(
+                    "saml:AttributeValue",
+                    {
                       "xmlns:xsi" => Saml::XML::Namespaces::SCHEMA_INSTANCE,
-                      "xsi:type" => "xs:string"},
-                      value
-                  end
+                      "xmlns:xs" => Saml::XML::Namespaces::SCHEMA,
+                      "xsi:type" => "xs:string"
+                    },
+                    value
+                  )
                 end
+              end
             end
          end
       end
     end
 
     def build_key_descriptor(el, type: "signing", cert: scrubbed_signing_certificate)
-      el.KeyDescriptor use: type do |key_descriptor|
-        key_descriptor.KeyInfo xmlns: Saml::XML::Namespaces::SIGNATURE do |key_info|
-          key_info.X509Data do |x509|
-            x509.X509Certificate cert
+      el.tag!("md:KeyDescriptor", use: type) do |key_descriptor|
+        key_descriptor.tag!("ds:KeyInfo", "xmlns:ds" => Saml::XML::Namespaces::SIGNATURE) do |key_info|
+          key_info.tag!("ds:X509Data") do |x509|
+            x509.tag!("ds:X509Certificate", cert)
           end
         end
       end
@@ -78,38 +104,39 @@ module SamlIdp
 
     def build_name_id_formats(el)
       name_id_formats.each do |format|
-        el.NameIDFormat format
+        el.tag!("md:NameIDFormat", format)
       end
     end
 
-    # def build_attribute(el)
-    #   attributes.each do |attribute|
-    #     el.tag! "saml:Attribute",
-    #       FriendlyName: attribute.friendly_name do |attribute_xml|
-    #         attribute.values.each do |value|
-    #           attribute_xml.tag! "saml:AttributeValue", value
-    #         end
-    #       end,
-    #       Name: attribute.name,
-    #       NameFormat: attribute.name_format
-    #   end
-    # end
+    def build_attribute(el)
+      attributes.each do |attribute|
+        el.tag!(
+          "saml:Attribute",
+          {
+            "xmlns:saml" => Saml::XML::Namespaces::ASSERTION,
+            Name: attribute.name,
+            NameFormat: attribute.name_format,
+            FriendlyName: attribute.friendly_name
+          }
+        )
+      end
+    end
 
     def build_organization(el)
-      el.Organization do |organization|
-        organization.OrganizationName organization_name, "xml:lang" => "en"
-        organization.OrganizationDisplayName organization_name, "xml:lang" => "en"
-        organization.OrganizationURL organization_url, "xml:lang" => "en"
+      el.tag! "md:Organization" do |organization|
+        organization.tag! "md:OrganizationName", organization_name, "xml:lang" => "en"
+        organization.tag! "md:OrganizationDisplayName", organization_name, "xml:lang" => "en"
+        organization.tag! "md:OrganizationURL", organization_url, "xml:lang" => "en"
       end
     end
 
     def build_contact(el)
-      el.ContactPerson contactType: "technical" do |contact|
-        contact.Company         technical_contact.company         if technical_contact.company
-        contact.GivenName       technical_contact.given_name      if technical_contact.given_name
-        contact.SurName         technical_contact.sur_name        if technical_contact.sur_name
-        contact.EmailAddress    technical_contact.mail_to_string  if technical_contact.mail_to_string
-        contact.TelephoneNumber technical_contact.telephone       if technical_contact.telephone
+      el.tag! "md:ContactPerson", contactType: "technical" do |contact|
+        contact.tag!("md:Company",         technical_contact.company)         if technical_contact.company
+        contact.tag!("md:GivenName",       technical_contact.given_name)      if technical_contact.given_name
+        contact.tag!("md:SurName",         technical_contact.sur_name)        if technical_contact.sur_name
+        contact.tag!("md:EmailAddress",    technical_contact.mail_to_string)  if technical_contact.mail_to_string
+        contact.tag!("md:TelephoneNumber", technical_contact.telephone)       if technical_contact.telephone
       end
     end
 
@@ -154,9 +181,11 @@ module SamlIdp
       organization_name
       organization_url
       attribute_service_location
-      single_service_post_location
+      artifact_resolution_service_location
       single_logout_service_post_location
       single_logout_service_redirect_location
+      single_sign_on_service_post_location
+      single_sign_on_service_redirect_location
       technical_contact
     ].each do |delegatable|
       define_method(delegatable) do
