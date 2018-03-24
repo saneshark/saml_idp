@@ -2,7 +2,7 @@
 require 'ostruct'
 module SamlIdp
   class Configurator
-    attr_accessor :idp_multi_cert
+    attr_accessor :idp_cert_multi
     attr_accessor :x509_certificate
     attr_accessor :secret_key
     attr_accessor :password
@@ -25,7 +25,7 @@ module SamlIdp
     attr_accessor :session_expiry
 
     def initialize
-      self.idp_multi_cert = nil
+      self.idp_cert_multi = nil
       self.x509_certificate = Default::X509_CERTIFICATE
       self.secret_key = Default::SECRET_KEY
       self.algorithm = :sha1
@@ -42,27 +42,27 @@ module SamlIdp
     end
 
     def signing_certificate
-      multi_cert? ? idp_multi_cert.dig(:signing, :signing_cert) : x509_certificate
+      multi_cert? ? idp_cert_multi.dig(:signing, :signing_cert) : x509_certificate
     end
 
     def signing_secret_key
-      multi_cert? ? idp_multi_cert.dig(:signing, :signing_key) : secret_key
+      multi_cert? ? idp_cert_multi.dig(:signing, :signing_key) : secret_key
     end
 
     def signing_password
-      multi_cert? ? idp_multi_cert.dig(:signing, :password) : password
+      multi_cert? ? idp_cert_multi.dig(:signing, :password) : password
     end
 
     def encryption_certificate
-      multi_cert? ? idp_multi_cert.dig(:encryption, :encryption_cert) : x509_certificate
+      multi_cert? ? idp_cert_multi.dig(:encryption, :encryption_cert) : x509_certificate
     end
 
     def encryption_secret_key
-      multi_cert? ? idp_multi_cert.dig(:encryption, :encryption_key) : secret_key
+      multi_cert? ? idp_cert_multi.dig(:encryption, :encryption_key) : secret_key
     end
 
     def encryption_password
-      multi_cert? ? idp_multi_cert.dig(:encryption, :password) : password
+      multi_cert? ? idp_cert_multi.dig(:encryption, :password) : password
     end
 
     # formats
@@ -76,7 +76,7 @@ module SamlIdp
     end
 
     def multi_cert?
-      idp_multi_cert.present?
+      idp_cert_multi.present?
     end
 
     class TechnicalContact < OpenStruct

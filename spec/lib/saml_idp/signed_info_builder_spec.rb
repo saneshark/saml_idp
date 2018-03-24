@@ -28,12 +28,12 @@ module SamlIdp
     NON_MULTI_SIG = "hKLeWLRgatHcV6N5Fc8aKveqNp6Y/J4m2WSYp0awGFtsCTa/2nab32wI3du+3kuuIy59EDKeUhHVxEfyhoHUo6xTZuO2N7XcTpSonuZ/CB3WjozC2Q/9elss3z1rOC3154v5pW4puirLPRoG+Pwi8SmptxNRHczr6NvmfYmmGfo="
 
     context "with multi_cert true" do
-      before(:each) { SamlIdp.config.idp_multi_cert = Default::IDP_MULTI_CERT }
+      before(:each) { SamlIdp.config.idp_cert_multi = Default::IDP_CERT_MULTI }
       include_examples "SignedInfoBuilder", NON_MULTI_SIG
     end
 
     context "with multi_cert false" do
-      before(:each) { SamlIdp.config.idp_multi_cert = nil }
+      before(:each) { SamlIdp.config.idp_cert_multi = nil }
       include_examples "SignedInfoBuilder", NON_MULTI_SIG
     end
   end

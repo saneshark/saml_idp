@@ -9,7 +9,7 @@ module SamlIdp
       fingerprint: FINGERPRINT
     }
 
-    # IDP_MULTI_CERT = {
+    # idp_cert_multi = {
     #   signing: {
     #     signing_cert: File.read("spec/support/certificates/idp_multi_signing_cert.crt"),
     #     signing_key: File.read("spec/support/certificates/idp_multi_signing_key.key"),
@@ -27,7 +27,7 @@ module SamlIdp
     #   }
     # }
 
-    IDP_MULTI_CERT = {
+    IDP_CERT_MULTI = {
       signing: {
         signing_cert: X509_CERTIFICATE,
         signing_key: SECRET_KEY,

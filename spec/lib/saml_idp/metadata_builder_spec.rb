@@ -191,12 +191,12 @@ module SamlIdp
 
   describe MetadataBuilder do
     context "with multi_cert true" do
-      before(:each) { SamlIdp.config.idp_multi_cert = Default::IDP_MULTI_CERT }
-      include_examples "MetadataBuilder", Default::IDP_MULTI_CERT[:service_provider][:fingerprint]
+      before(:each) { SamlIdp.config.idp_cert_multi = Default::IDP_CERT_MULTI }
+      include_examples "MetadataBuilder", Default::IDP_CERT_MULTI[:service_provider][:fingerprint]
     end
 
     context "with multi_cert false" do
-      before(:each) { SamlIdp.config.idp_multi_cert = nil }
+      before(:each) { SamlIdp.config.idp_cert_multi = nil }
       include_examples "MetadataBuilder", Default::FINGERPRINT
     end
   end
