@@ -1,5 +1,7 @@
 module SamlIdp
   module Utils
+    extend self
+    
     def remove_headers_and_footer(string)
       string.to_s
         .gsub(/-----BEGIN CERTIFICATE-----/,"")

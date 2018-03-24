@@ -5,11 +5,11 @@ require 'saml_idp/encryptor'
 module SamlIdp
   describe Encryptor do
     let (:encryption_opts) do
-      {   
-        cert: Default::X509_CERTIFICATE,
+      {
+        cert: Utils.remove_headers_and_footer(Default::X509_CERTIFICATE),
         block_encryption: 'aes256-cbc',
         key_transport: 'rsa-oaep-mgf1p',
-      }   
+      }
     end
 
     subject { described_class.new encryption_opts }

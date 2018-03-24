@@ -14,7 +14,7 @@ module SamlIdp
     let(:expiry) { 3*60*60 }
     let (:encryption_opts) do
       {
-        cert: Default::X509_CERTIFICATE,
+        cert: Utils.remove_headers_and_footer(Default::X509_CERTIFICATE),
         block_encryption: 'aes256-cbc',
         key_transport: 'rsa-oaep-mgf1p',
       }

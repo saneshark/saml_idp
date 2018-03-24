@@ -10,8 +10,8 @@ module SamlIdp
     let(:saml_acs_url) { "localhost/acs" }
     let(:algorithm) { :sha1 }
     let(:secret_key) { Default::SECRET_KEY }
-    let(:x509_certificate) { Default::X509_CERTIFICATE }
-    let(:xauthn) { Default::X509_CERTIFICATE }
+    let(:x509_certificate) { Utils.remove_headers_and_footer Default::X509_CERTIFICATE }
+    let(:xauthn) { Utils.remove_headers_and_footer Default::X509_CERTIFICATE }
     let(:authn_context_classref) {
       Saml::XML::Namespaces::AuthnContext::ClassRef::PASSWORD
     }
@@ -19,7 +19,7 @@ module SamlIdp
     let(:session_expiry) { 24 * 60 * 60 }
     let (:encryption_opts) do
       {
-        cert: Default::X509_CERTIFICATE,
+        cert: Utils.remove_headers_and_footer(Default::X509_CERTIFICATE),
         block_encryption: 'aes256-cbc',
         key_transport: 'rsa-oaep-mgf1p',
       }
@@ -102,7 +102,7 @@ module SamlIdp
   end
 
   describe SamlResponse do
-    xcontext "with multi_cert true" do
+    context "with multi_cert true" do
       before(:each) { SamlIdp.config.idp_multi_cert = Default::IDP_MULTI_CERT }
       include_examples "SamlResponse"
     end

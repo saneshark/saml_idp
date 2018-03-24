@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'spec_helper'
+require 'saml_idp/utils'
 
 shared_examples 'SamlIdp::Controller' do |options|
   it "should find the SAML ACS URL" do
@@ -13,7 +14,7 @@ shared_examples 'SamlIdp::Controller' do |options|
     let(:principal) { double email_address: "foo@example.com" }
     let (:encryption_opts) do
       {
-        cert: SamlIdp::Default::X509_CERTIFICATE,
+        cert: SamlIdp::Utils.remove_headers_and_footer(SamlIdp::Default::X509_CERTIFICATE),
         block_encryption: 'aes256-cbc',
         key_transport: 'rsa-oaep-mgf1p',
       }
@@ -58,7 +59,7 @@ shared_examples 'SamlIdp::Controller' do |options|
 
       [:sha1, :sha256, :sha384, :sha512].each do |algorithm_name|
         next if options[:skip].include?(algorithm_name)
-        
+
         it "should create a SAML Response using the #{algorithm_name} algorithm" do
           self.algorithm = algorithm_name
           saml_response = encode_response(principal)

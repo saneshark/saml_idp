@@ -2,63 +2,47 @@
 module SamlIdp
   module Default
     NAME_ID_FORMAT = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
-    X509_CERTIFICATE = <<EOS.strip
-MIIDqzCCAxSgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBhjELMAkGA1UEBhMCQVUx
-DDAKBgNVBAgTA05TVzEPMA0GA1UEBxMGU3lkbmV5MQwwCgYDVQQKDANQSVQxCTAH
-BgNVBAsMADEYMBYGA1UEAwwPbGF3cmVuY2VwaXQuY29tMSUwIwYJKoZIhvcNAQkB
-DBZsYXdyZW5jZS5waXRAZ21haWwuY29tMB4XDTEyMDQyODAyMjIyOFoXDTMyMDQy
-MzAyMjIyOFowgYYxCzAJBgNVBAYTAkFVMQwwCgYDVQQIEwNOU1cxDzANBgNVBAcT
-BlN5ZG5leTEMMAoGA1UECgwDUElUMQkwBwYDVQQLDAAxGDAWBgNVBAMMD2xhd3Jl
-bmNlcGl0LmNvbTElMCMGCSqGSIb3DQEJAQwWbGF3cmVuY2UucGl0QGdtYWlsLmNv
-bTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAuBywPNlC1FopGLYfF96SotiK
-8Nj6/nW084O4omRMifzy7x955RLEy673q2aiJNB3LvE6Xvkt9cGtxtNoOXw1g2Uv
-HKpldQbr6bOEjLNeDNW7j0ob+JrRvAUOK9CRgdyw5MC6lwqVQQ5C1DnaT/2fSBFj
-asBFTR24dEpfTy8HfKECAwEAAaOCASUwggEhMAkGA1UdEwQCMAAwCwYDVR0PBAQD
-AgUgMB0GA1UdDgQWBBQNBGmmt3ytKpcJaBaYNbnyU2xkazATBgNVHSUEDDAKBggr
-BgEFBQcDATAdBglghkgBhvhCAQ0EEBYOVGVzdCBYNTA5IGNlcnQwgbMGA1UdIwSB
-qzCBqIAUDQRpprd8rSqXCWgWmDW58lNsZGuhgYykgYkwgYYxCzAJBgNVBAYTAkFV
-MQwwCgYDVQQIEwNOU1cxDzANBgNVBAcTBlN5ZG5leTEMMAoGA1UECgwDUElUMQkw
-BwYDVQQLDAAxGDAWBgNVBAMMD2xhd3JlbmNlcGl0LmNvbTElMCMGCSqGSIb3DQEJ
-AQwWbGF3cmVuY2UucGl0QGdtYWlsLmNvbYIBATANBgkqhkiG9w0BAQsFAAOBgQAE
-cVUPBX7uZmzqZJfy+tUPOT5ImNQj8VE2lerhnFjnGPHmHIqhpzgnwHQujJfs/a30
-9Wm5qwcCaC1eO5cWjcG0x3OjdllsgYDatl5GAumtBx8J3NhWRqNUgitCIkQlxHIw
-UfgQaCushYgDDL5YbIQa++egCgpIZ+T0Dj5oRew//A==
-EOS
+    X509_CERTIFICATE = File.read("spec/support/certificates/default_cert.crt") rescue nil
     FINGERPRINT = "9E:65:2E:03:06:8D:80:F2:86:C7:6C:77:A1:D9:14:97:0A:4D:F4:4D"
-    SECRET_KEY = <<EOS
------BEGIN RSA PRIVATE KEY-----
-MIICXAIBAAKBgQC4HLA82ULUWikYth8X3pKi2Irw2Pr+dbTzg7iiZEyJ/PLvH3nl
-EsTLrverZqIk0Hcu8Tpe+S31wa3G02g5fDWDZS8cqmV1Buvps4SMs14M1buPShv4
-mtG8BQ4r0JGB3LDkwLqXCpVBDkLUOdpP/Z9IEWNqwEVNHbh0Sl9PLwd8oQIDAQAB
-AoGAQmUGIUtwUEgbXe//kooPc26H3IdDLJSiJtcvtFBbUb/Ik/dT7AoysgltA4DF
-pGURNfqERE+0BVZNJtCCW4ixew4uEhk1XowYXHCzjkzyYoFuT9v5SP4cu4q3t1kK
-51JF237F0eCY3qC3k96CzPGG67bwOu9EeXAu4ka/plLdsAECQQDkg0uhR/vsJffx
-tiWxcDRNFoZpCpzpdWfQBnHBzj9ZC0xrdVilxBgBpupCljO2Scy4MeiY4S1Mleel
-CWRqh7RBAkEAzkIjUnllEkr5sjVb7pNy+e/eakuDxvZck0Z8X3USUki/Nm3E/GPP
-c+CwmXR4QlpMpJr3/Prf1j59l/LAK9AwYQJBAL9eRSQYCJ3HXlGKXR6v/NziFEY7
-oRTSQdIw02ueseZ8U89aQpbwFbqsclq5Ny1duJg5E7WUPj94+rl3mCSu6QECQBVh
-0duY7htpXl1VHsSq0H6MmVgXn/+eRpaV9grHTjDtjbUMyCEKD9WJc4VVB6qJRezC
-i/bT4ySIsehwp+9i08ECQEH03lCpHpbwiWH4sD25l/z3g2jCbIZ+RTV6yHIz7Coh
-gAbBqA04wh64JhhfG69oTBwqwj3imlWF8+jDzV9RNNw=
------END RSA PRIVATE KEY-----
-EOS
+    SECRET_KEY = File.read("spec/support/certificates/default_key.key") rescue nil
     SERVICE_PROVIDER = {
       fingerprint: FINGERPRINT
     }
 
+    # IDP_MULTI_CERT = {
+    #   signing: {
+    #     signing_cert: File.read("spec/support/certificates/idp_multi_signing_cert.crt"),
+    #     signing_key: File.read("spec/support/certificates/idp_multi_signing_key.key"),
+    #     password: '1234',
+    #     fingerprint: "8B:06:38:EA:1C:5F:EC:2B:8E:E8:C8:62:C7:ED:C7:03:41:38:61:B5"
+    #   },
+    #   encryption: {
+    #     encryption_cert: File.read("spec/support/certificates/idp_multi_encryption_cert.crt"),
+    #     encryption_key: File.read("spec/support/certificates/idp_multi_encryption_key.key"),
+    #     password: '1234',
+    #     fingerprint: "40:59:79:97:B7:63:22:CA:1C:CF:1F:3E:B0:6C:6F:F7:3D:85:7C:96"
+    #   },
+    #   service_provider: {
+    #     fingerprint: "8B:06:38:EA:1C:5F:EC:2B:8E:E8:C8:62:C7:ED:C7:03:41:38:61:B5"
+    #   }
+    # }
+
     IDP_MULTI_CERT = {
       signing: {
-        signing_cert: File.read("spec/support/certificates/idp_multi_signing_cert.crt"),
-        signing_key: File.read("spec/support/certificates/idp_multi_signing_key.key"),
-        password: '1234'
+        signing_cert: X509_CERTIFICATE,
+        signing_key: SECRET_KEY,
+        password: '1234',
+        fingerprint: "9E:65:2E:03:06:8D:80:F2:86:C7:6C:77:A1:D9:14:97:0A:4D:F4:4D"
       },
       encryption: {
-        encryption_cert: File.read("spec/support/certificates/idp_multi_encryption_cert.crt"),
-        encryption_key: File.read("spec/support/certificates/idp_multi_encryption_key.key"),
-        password: '1234'
+        encryption_cert: X509_CERTIFICATE,
+        encryption_key: SECRET_KEY,
+        password: '1234',
+        fingerprint: "9E:65:2E:03:06:8D:80:F2:86:C7:6C:77:A1:D9:14:97:0A:4D:F4:4D"
+      },
+      service_provider: {
+        fingerprint: "9E:65:2E:03:06:8D:80:F2:86:C7:6C:77:A1:D9:14:97:0A:4D:F4:4D"
       }
     }
-    IDP_MULTI_CERT_SIGNING_FINGERPRINT = "8B:06:38:EA:1C:5F:EC:2B:8E:E8:C8:62:C7:ED:C7:03:41:38:61:B5"
-    IDP_MULTI_CERT_ENCRYPTION_FINGERPRINT = "40:59:79:97:B7:63:22:CA:1C:CF:1F:3E:B0:6C:6F:F7:3D:85:7C:96"
   end
 end

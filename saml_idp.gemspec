@@ -59,4 +59,5 @@ section of the README.
   s.add_development_dependency('xmlenc', '>= 0.6.4')
   s.add_development_dependency('appraisal')
   s.add_development_dependency('pry-nav')
+  s.add_development_dependency('selenium-webdriver')
 end
