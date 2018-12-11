@@ -8,7 +8,7 @@ feature 'IdpController' do
     Capybara.current_driver = :chrome
     saml_request = make_saml_request("http://foo.example.com/saml/consume")
     visit "/saml/auth?SAMLRequest=#{CGI.escape(saml_request)}"
-    
+
     fill_in 'Email', :with => "foo@example.com"
     fill_in 'Password', :with => "okidoki"
     click_button 'Sign in'

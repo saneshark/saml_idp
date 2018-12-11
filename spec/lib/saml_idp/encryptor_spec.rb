@@ -17,7 +17,7 @@ module SamlIdp
     it "encrypts XML" do
       raw_xml = '<foo>bar</foo>'
       encrypted_xml = subject.encrypt(raw_xml)
-      expect(encrypted_xml).to_not match 'bar'
+      expect(encrypted_xml).to_not match raw_xml
       encrypted_doc = Nokogiri::XML::Document.parse(encrypted_xml)
       encrypted_data = Xmlenc::EncryptedData.new(encrypted_doc.at_xpath('//xenc:EncryptedData', Xmlenc::NAMESPACES))
       decrypted_xml = encrypted_data.decrypt(subject.encryption_key)

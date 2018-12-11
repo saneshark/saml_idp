@@ -93,6 +93,8 @@ CERT
   # config.organization_url = "http://example.com"
   # config.base_saml_location = "#{base}/saml"
   # config.reference_id_generator                                 # Default: -> { UUID.generate }
+  # config.single_logout_service_post_location = "#{base}/saml/logout"
+  # config.single_logout_service_redirect_location = "#{base}/saml/logout"
   # config.attribute_service_location = "#{base}/saml/attributes"
   # config.single_service_post_location = "#{base}/saml/auth"
   # config.session_expiry = 86400                                 # Default: 0 which means never
@@ -169,7 +171,11 @@ CERT
   service_providers = {
     "some-issuer-url.com/saml" => {
       fingerprint: "9E:65:2E:03:06:8D:80:F2:86:C7:6C:77:A1:D9:14:97:0A:4D:F4:4D",
-      metadata_url: "http://some-issuer-url.com/saml/metadata"
+      metadata_url: "http://some-issuer-url.com/saml/metadata",
+
+      # We now validate AssertionConsumerServiceURL will match the MetadataURL set above.
+      # *If* it's not going to match your Metadata URL's Host, then set this so we can validate the host using this list
+      response_hosts: ["foo.some-issuer-url.com"]
     },
   }
 

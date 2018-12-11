@@ -22,6 +22,7 @@ module SamlIdp
     attr_accessor :entity_attributes
     attr_accessor :attributes
     attr_accessor :service_provider
+    attr_accessor :assertion_consumer_service_hosts
     attr_accessor :session_expiry
 
     def initialize
